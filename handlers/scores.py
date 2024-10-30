@@ -120,7 +120,7 @@ async def view_scores(message: Message):
         average_score = total_score / len(scores)
         response += f"\n📊 Средний балл: {average_score:.1f}"
 
-    await message.answer(response)
+    await message.answer(response, reply_markup=get_main_menu_keyboard())
 
 
 @router.message(F.text == "📝 Ввести баллы")
