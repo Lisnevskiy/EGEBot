@@ -57,30 +57,30 @@ async def get_score(message: Message, state: FSMContext):
         score = int(message.text.strip())
         if not 0 <= score <= 100:
             raise ValueError
-
-        data = await state.get_data()
-        subject = data.get("subject")
-
-        student = session.query(Student).filter_by(id=message.from_user.id).first()
-
-        existing_score = session.query(Score).filter_by(student_id=student.id, subject=subject).first()
-
-        if existing_score:
-            existing_score.score = score
-            action_text = "обновлены"
-        else:
-            score_entry = Score(subject=subject, score=score, student_id=student.id)
-            session.add(score_entry)
-            action_text = "сохранены"
-
-        session.commit()
-        await message.answer(
-            f"Баллы по предмету {subject} успешно {action_text}!\n\n" "Хочешь добавить еще один предмет?",
-            reply_markup=get_confirmation_keyboard(),
-        )
-        await state.set_state(EnterScore.confirm)
     except ValueError:
         await message.answer("Пожалуйста, введи корректный балл (целое число от 0 до 100).")
+
+    data = await state.get_data()
+    subject = data.get("subject")
+
+    student = session.query(Student).filter_by(id=message.from_user.id).first()
+
+    existing_score = session.query(Score).filter_by(student_id=student.id, subject=subject).first()
+
+    if existing_score:
+        existing_score.score = score
+        action_text = "обновлены"
+    else:
+        score_entry = Score(subject=subject, score=score, student_id=student.id)
+        session.add(score_entry)
+        action_text = "сохранены"
+
+    session.commit()
+    await message.answer(
+        f"Баллы по предмету {subject} успешно {action_text}!\n\n" "Хочешь добавить еще один предмет?",
+        reply_markup=get_confirmation_keyboard(),
+    )
+    await state.set_state(EnterScore.confirm)
 
 
 @router.message(Command(commands=["view_scores"]))
